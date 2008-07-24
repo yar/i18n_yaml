@@ -1,0 +1,107 @@
+# used in array.to_sentence
+support:
+  array:
+    sentence_connector: en
+# used in number_to_currency(float)
+currency:
+  format:
+    separator: "."
+    delimeter: ","
+    unit: "&euro;"
+    format: "%u %n"
+    precision: 2
+
+date:
+  formats: 
+    default: "%d-%m-%Y"
+    short: "%d-%m"
+    long: "%d %B %Y"
+  day_names:
+    - zondag
+    - maandag
+    - dinsdag
+    - woensdag
+    - donderdag
+    - vrijdag
+    - zaterdag
+  abbr_day_names:
+    - zo
+    - ma
+    - di
+    - wo
+    - do
+    - vr
+    - za
+  month_names:
+    - 
+    - januari
+    - februari
+    - maart
+    - april
+    - mei
+    - juni
+    - juli
+    - augustus
+    - september
+    - oktober
+    - november
+    - december
+  abbr_month_names:
+    - 
+    - jan
+    - feb
+    - maa
+    - apr
+    - mei
+    - jun
+    - jul
+    - aug
+    - sept
+    - okt
+    - nov
+    - dec
+  order:
+    - day
+    - month
+    - year
+time:
+  formats:
+    default: %d-%m-%Y, %H:%M
+    short: %H:%M
+    long: %a, %d %B %Y, %H:%M:%S %z
+  am: am
+  pm: pm
+datetime:
+  distance_in_words:
+    half_a_minute: een halve minuut
+    less_than_x_seconds:
+      - minder dan een seconde
+      - "minder dan {{count}} seconden"
+    x_seconds:
+      - een seconde
+      - "{{count}} seconden"
+    less_than_x_minutes:
+      - minder dan een minuut
+      - "minder dan {{count}} minuten"
+    x_minutes:
+      - een minuut
+      - "{{count}} minuten"
+    about_x_hours:
+      - ongeveer een uur
+      - "ongeveer {{count}} uur"
+    x_days:
+      - een dag
+      - "{{count}} dagen"
+    about_x_months:
+      - ongeveer een maand
+      - "ongeveer {{count}} maanden"
+    x_months:
+      - een maand
+      - "{{count}} maanden"
+    about_x_years:
+      - ongeveer een jaar
+      - "ongeveer {{count}} jaar"
+    over_x_years:
+      - meer dan een jaar
+      - "meer dan {{count}} jaar"
+      
