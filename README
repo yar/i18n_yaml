@@ -9,28 +9,30 @@ Features in version 0.0.1
 
 * It stores basic translations in yaml files in app/locales/locale-name/*.yml.
 * It strives to provide basic translations for core rails functions like date names in rails.yml.
-* It provides a before_filter to get the locale from parameter or session.
+* It provides a before_filter to get the locale from params[:locale], sessions[:locale] and ACCEPT_LANGUAGE-http-header.
 * It provides a few helper methods for translating in combination with html-escaping.
+* Those helper methods accept blocks, so they can be easily nested and used with Haml.
 
 If you have any comments, please contact me. Any default translations are most welcome.
 Contact me through my website: http://iain.nl/. Any email to this domain will be recieved.
+
+A more complete manual can be found at the github's wiki: http://github.com/iain/i18n_yaml/wikis
 
 Todos
 =======
 
 * Make a generator to add languages, based upon the translations you already have
-* Choose which locales are allowed in your site
 * Write tests.......
-* Maybe add a prefered locale based upon http string or something
-* Add a rake task which compares your translation files to see locate missing translations
-* Automatically write missing.yml when no translation has been found.
+* Add a rake task which compares your translation files to see if some translations are incomplete
+* Automatically write missing.yml when a missing translation has been found
 
 
-Example
+Examples
 =======
 
   # app/controllers/application.rb
   class ApplicationController < ActionController::Base
+    I18n.default_locale = 'dutch' # if all else fails
     before_filter :set_locale
   end
 
@@ -46,6 +48,12 @@ Example
   <%= ht(:amount_of_users, :count => User.count)%> 
   <%= t('scoped.message') %>
   <%= l(Time.now) %>
+
+  # app/views/admin/index.html.haml
+  %p= t(:it_is_today) do |i|
+    - i.today = l(Date.today) do |j|
+      - j.format = :short
+
 
 
 Copyright (c) 2008 Iain Hecker, released under the MIT license
