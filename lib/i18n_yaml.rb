@@ -13,35 +13,66 @@ module I18nYaml
     #
     # The locale can be set through a parameter locale. 
     # It stores the locale in the session after that.
+    #
+    # Copy this function to your application.rb if you want to adjust it, to say, recognize subdomains as locale.
     def set_locale
-      locale = params[:locale] || session[:locale]
-      locale = (I18n.locale_dir(locale) ? locale : nil) || I18n.default_locale
-      logger.info "Using locale: #{locale}"
-      I18n.locale = locale
-      I18n.load_yaml_locale(locale)
-      session[:locale] = locale
+      I18n.select_locale( params[:locale], session[:locale], I18n.from_http_header(request) )
+      logger.info "Using language: #{I18n.locale}"
+      session[:locale] = I18n.locale
     end
 
   end
 
   module YamlLoader
 
-    # Returns the root directory of the locales. This is app/locales
-    def locales_dir
-      "#{RAILS_ROOT}/app/locales"
+    # Selects and loads the appropriate locale.
+    # It selects the first from the arguments which is installed.
+    def select_locale(*possible_locales)
+      locale = (possible_locales << I18n.default_locale).flatten.select do |x|
+        puts 'trying locale: ' + x.inspect
+        locale_available?(x)
+      end.first
+      I18n.locale = select_language(locale)
+      I18n.load_yaml_locale
     end
 
-    # Returns the directory in which the given locale is located.
-    # Returns nil if this locale directory doesn't exist.
-    def locale_dir(locale)
-      return nil if locale.nil?
-      dir = "#{locales_dir}/#{locale}"
-      File.directory?(dir) ? dir : nil
+    # Splits the http-header for the users favorite language into an array, so it can be prosessed in select_locale.
+    def from_http_header(request)
+      languages = request.env['HTTP_ACCEPT_LANGUAGE'].split(',')
+      languages.collect do |language|
+        language.sub(/;.*/,'')
+      end
     end
-    
-    # Returns all available locales, i.e. the subdirectories of app/locales
-    def all_available_locales
-      Dir.entries(locales_dir).select { |i| File.directory?("#{locales_dir}/#{i}") && i != '.' && i != '..' }
+
+    # Returns the root directory of the locales. This defaults to app/locales
+    def locales_dir
+      @locales_dir ||= File.join(RAILS_ROOT, 'app', 'locales')
+    end
+
+    # Set the path of your locales, if different to app/locales
+    def locales_dir=(l)
+      raise ArgumentError, "Not a directory: #{l}" unless File.directory?(l)
+      @locales_dir = l
+    end
+
+    # Returns all locales available, in a hash from locales.yml
+    def available_locales
+      Rails.cache.fetch('locales') do
+        YAML.load_file(File.join(locales_dir, 'locales.yml'))
+      end
+    end
+
+    # Checks if the locale has been installed
+    def locale_available?(locale)
+      return nil if locale.nil?
+      available_locales.values.flatten.include?(locale.downcase)
+    end
+
+    # Selects the proper language, corresponding to the loaddir
+    def select_language(locale)
+      available_locales.select do |language, locales|
+        locales.include?(locale.downcase)
+      end.first.first
     end
 
     # Loads all yaml files in for a certain locale.
@@ -55,11 +86,11 @@ module I18nYaml
     #   I18n.load_yaml_locale('nl-NL', :force => false)        # Always use caching, ignoring Rails' settings
     #   I18n.load_yaml_locale('nl-NL', :expiry => 1.day.to_i)  # Alternative caching options if your cache_store supports it
     #
-    def load_yaml_locale(locale, options = {})
+    def load_yaml_locale(locale = I18n.locale, options = {})
       caching_options = ( ::ActionController::Base.perform_caching ? {} : { :force => true } ).merge(options)
       loaded_translations = Rails.cache.fetch("locales/#{locale}", caching_options) do
         translations = {}
-        Dir.glob(File.join("#{I18n.locale_dir(locale)}/**", "*.yml")).each do |file|
+        Dir.glob(File.join(I18n.locales_dir, locale, "*.yml")).each do |file|
           translations.merge!(YAML.load_file(file))
         end
         translations

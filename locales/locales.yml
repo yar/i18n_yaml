@@ -1,0 +1,9 @@
+# specify which languages are available and which locales belong to it. Only include languages you use in this file.
+english:
+  - en-us
+  - en-gb
+  - en
+dutch:
+  - nl
+  - nl-nl
+  - nl-be
