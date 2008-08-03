@@ -13,6 +13,7 @@ module I18nYaml
     end
 
     # Splits the http-header for the users favorite language into an array, so it can be prosessed in select_locale.
+    # TODO use the http_accept_language plugin for this.
     def from_http_header(request)
       languages = request.env['HTTP_ACCEPT_LANGUAGE'].split(',')
       languages.collect do |language|
@@ -47,7 +48,7 @@ module I18nYaml
     # Selects the proper language, corresponding to the loaddir
     def select_language(locale)
       available_locales.select do |language, locales|
-        locales.include?(locale.downcase)
+        locales.include?(locale)
       end.first.first
     end
 
@@ -62,6 +63,7 @@ module I18nYaml
     #   I18n.load_yaml_locale('nl-NL', :force => false)        # Always use caching, ignoring Rails' settings
     #   I18n.load_yaml_locale('nl-NL', :expiry => 1.day.to_i)  # Alternative caching options if your cache_store supports it
     #
+    # TODO push this into a custom backend and use I18n#populate
     def load_yaml_locale(locale = I18n.locale, options = {})
       caching_options = ( ::ActionController::Base.perform_caching ? {} : { :force => true } ).merge(options)
       loaded_translations = Rails.cache.fetch("locales/#{locale}", caching_options) do
